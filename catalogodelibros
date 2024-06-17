@@ -1,0 +1,110 @@
+import requests
+class CatalogoLibros:
+    def __init__(self, api_url):
+        self.api_url = api_url
+    
+    def buscar_por_titulo(self, titulo):
+        response = requests.get(f'{self.api_url}/search', params={'title': titulo})
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+    
+    def buscar_por_autor(self, autor):
+        response = requests.get(f'{self.api_url}/search', params={'author': autor})
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+    
+    def obtener_detalles(self, libro_id):
+        response = requests.get(f'{self.api_url}/book/{libro_id}')
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+    
+    def listar_por_categoria(self, categoria):
+        response = requests.get(f'{self.api_url}/category', params={'category': categoria})
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+    
+    def recomendar_libros(self, historial):
+        response = requests.post(f'{self.api_url}/recommend', json={'history': historial})
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+def menu_interactivo():
+    api_url = 'https://api.ficticia.com'
+    catalogo = CatalogoLibros(api_url)
+    historial = []
+
+    while True:
+        print("\nCatálogo de Libros")
+        print("1. Buscar libro por título")
+        print("2. Buscar libro por autor")
+        print("3. Obtener detalles de un libro")
+        print("4. Listar libros por categoría")
+        print("5. Recomendar libros")
+        print("6. Salir")
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == '1':
+            titulo = input("Ingrese el título del libro: ")
+            libros = catalogo.buscar_por_titulo(titulo)
+            if libros:
+                for libro in libros:
+                    print(f"Título: {libro['title']}, Autor: {libro['author']}, Año: {libro['year']}")
+                historial.append({'type': 'title', 'query': titulo})
+            else:
+                print("No se encontraron libros.")
+        
+        elif opcion == '2':
+            autor = input("Ingrese el nombre del autor: ")
+            libros = catalogo.buscar_por_autor(autor)
+            if libros:
+                for libro in libros:
+                    print(f"Título: {libro['title']}, Año: {libro['year']}")
+                historial.append({'type': 'author', 'query': autor})
+            else:
+                print("No se encontraron libros.")
+        
+        elif opcion == '3':
+            libro_id = input("Ingrese el ID del libro: ")
+            detalles = catalogo.obtener_detalles(libro_id)
+            if detalles:
+                print(f"Título: {detalles['title']}\nAutor: {detalles['author']}\nAño: {detalles['year']}\nSinopsis: {detalles['synopsis']}")
+            else:
+                print("No se encontraron detalles del libro.")
+        
+        elif opcion == '4':
+            categoria = input("Ingrese la categoría: ")
+            libros = catalogo.listar_por_categoria(categoria)
+            if libros:
+                for libro in libros:
+                    print(f"Título: {libro['title']}, Autor: {libro['author']}, Año: {libro['year']}")
+                historial.append({'type': 'category', 'query': categoria})
+            else:
+                print("No se encontraron libros en esa categoría.")
+        
+        elif opcion == '5':
+            recomendaciones = catalogo.recomendar_libros(historial)
+            if recomendaciones:
+                for libro in recomendaciones:
+                    print(f"Título: {libro['title']}, Autor: {libro['author']}, Año: {libro['year']}")
+            else:
+                print("No se encontraron recomendaciones.")
+        
+        elif opcion == '6':
+            print("Saliendo del catálogo de libros.")
+            break
+        
+        else:
+            print("Opción no válida. Intente de nuevo.")
+
+if __name__ == "__main__":
+    menu_interactivo()
